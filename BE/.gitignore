@@ -1,0 +1,40 @@
+Python bytecode files
+pycache/
+*.py[cod]
+*.pyo
+
+Virtual environment
+venv/
+.env/
+
+Flask-specific
+instance/
+*.db
+*.sqlite3
+
+PyCharm
+.idea/
+
+VS Code
+.vscode/
+
+Jupyter Notebook
+.ipynb_checkpoints/
+
+Logs
+*.log
+
+Test coverage
+.coverage
+.tox/
+.nox/
+.dist/
+.build/
+*.egg-info/
+.eggs/
+
+MacOS
+.DS_Store
+
+Windows
+Thumbs.db
