@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #3b82f6;
+  --secondary-color: #64748b;
+  --success-color: #22c55e;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  --info-color: #0ea5e9;
+  --background-color: #f8fafc;
+  --sidebar-color: #f1f5f9;
+  --border-color: #e2e8f0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-color);
+  color: #334155;
+}
+
+/* Layout */
+.badge {
+  @apply px-2 py-1 text-xs rounded-full;
+}
+
+.badge-primary {
+  @apply bg-blue-100 text-blue-800;
+}
+
+/* Forms */
+.form-group {
+  @apply mb-4;
+}
+
+.form-control {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+/* Buttons */
+.btn {
+  @apply px-4 py-2 rounded-md font-medium transition-colors duration-200;
+}
+
+.btn-primary {
+  @apply bg-blue-500 text-white hover:bg-blue-600;
+}
+
+.btn-secondary {
+  @apply bg-gray-500 text-white hover:bg-gray-600;
+}
+
+.btn-success {
+  @apply bg-green-500 text-white hover:bg-green-600;
+}
+
+.btn-danger {
+  @apply bg-red-500 text-white hover:bg-red-600;
+}
+
+/* Cards */
+.card {
+  @apply bg-white rounded-lg shadow-sm p-4 border border-gray-100;
+}
+
+/* Colors */
+.text-primary-color {
+  color: var(--primary-color);
+}
+
+.text-secondary-color {
+  color: var(--secondary-color);
+}
+
+.text-success-color {
+  color: var(--success-color);
+}
+
+.text-warning-color {
+  color: var(--warning-color);
+}
+
+.text-error-color {
+  color: var(--error-color);
+}
+
+.text-info-color {
+  color: var(--info-color);
+}
+
+.bg-primary-color {
+  background-color: var(--primary-color);
+}
+
+.bg-secondary-color {
+  background-color: var(--secondary-color);
+}
+
+.bg-success-color {
+  background-color: var(--success-color);
+}
+
+.bg-warning-color {
+  background-color: var(--warning-color);
+}
+
+.bg-error-color {
+  background-color: var(--error-color);
+}
+
+.bg-info-color {
+  background-color: var(--info-color);
+}
+
+.bg-sidebar-color {
+  background-color: var(--sidebar-color);
+}
+
+.border-border-color {
+  border-color: var(--border-color);
+}
