@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify
 from app import db
 from app.models.user import Users, Student, Instructor, UserRole, Role, Faculty, Major,Permission
-from app.controllers.admin import role_required
+from BE.app.controllers.api.admin import role_required
 
 role_bp = Blueprint('role_bp', __name__)
 

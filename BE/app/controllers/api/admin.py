@@ -7,9 +7,11 @@ from app import db
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 from functools import wraps
-
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
+from werkzeug.security import check_password_hash
+import random
+from flask_mail import Message
+from app.extensions import mail, db
 admin_bp = Blueprint('admin_bp', __name__)
 
 # Hàm tạo student_id từ năm nhập học, ngành, khoa và STT
@@ -558,7 +560,10 @@ def restore_user(user_id):
 # lấy role của người dùng , chỉ có admin hoặc người dùng đó mới lấy đc
 @admin_bp.route('/get_user_roles/<int:user_id>', methods=['GET'])
 @jwt_required()
+
 def get_user_roles(user_id):
+
+    
     # Chỉ cho phép admin hoặc chính người dùng đó xem role
     current_user_id = get_jwt_identity()
     current_user_roles = (
@@ -646,3 +651,83 @@ def remove_role_from_user(user_id, role_id):
     db.session.commit()
 
     return jsonify({'message': 'Gỡ vai trò khỏi người dùng thành công'}), 200
+
+
+# đăng nhập lần đầu phải đổi mk
+@admin_bp.route('/change-password-first-time', methods=['POST'])
+@jwt_required()
+def change_password_first_time():
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+    new_password = data.get('new_password')
+
+    user = Users.query.get(current_user_id)
+    user.password = generate_password_hash(new_password)
+    user.first_login = False  # Đã đổi mật khẩu
+    db.session.commit()
+
+    return jsonify({'message': 'Đổi mật khẩu thành công'})
+
+
+
+reset_codes = {}
+# gửi gmail
+@admin_bp.route('/send-email', methods=['POST']) 
+def forgot_password():
+    data = request.get_json()
+    email = data.get("email")
+
+    user = Users.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "Không tìm thấy email"}), 404
+
+    code = str(random.randint(100000, 999999))
+    reset_codes[email] = code
+
+    # Gửi email
+    msg = Message("Mã khôi phục mật khẩu", recipients=[email])
+    msg.body = f"Mã xác nhận của bạn là: {code}"
+    mail.send(msg)
+
+    return jsonify({"message": "Mã xác nhận đã được gửi đến email"}), 200
+
+# thay doi mk khi chua dang nhap --> phai gui gmail de lay ma
+@admin_bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    email = data.get("email")
+    code = data.get("code")
+    new_password = data.get("new_password")
+
+    if reset_codes.get(email) != code:
+        return jsonify({"error": "Mã xác nhận không đúng"}), 400
+
+    user = Users.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "Không tìm thấy người dùng"}), 404
+
+    user.password = generate_password_hash(new_password)
+    db.session.commit()
+    reset_codes.pop(email)  # Xóa mã sau khi dùng
+
+    return jsonify({"message": "Đổi mật khẩu thành công"}), 201
+
+
+# đôi mk khi đã đăng nhập
+@admin_bp.route('/change-password', methods=['POST'])
+@jwt_required()
+def change_password():
+    user_id = get_jwt_identity()
+    user = Users.query.get(user_id)
+
+    data = request.get_json()
+    old_password = data.get("old_password")
+    new_password = data.get("new_password")
+
+    if not check_password_hash(user.password, old_password):
+        return jsonify({"error": "Mật khẩu cũ không đúng"}), 400
+
+    user.password = generate_password_hash(new_password)
+    db.session.commit()
+
+    return jsonify({"message": "Đổi mật khẩu thành công"}), 200

@@ -2,6 +2,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_mail import Mail
+
 # Tạo một đối tượng duy nhất cho SQLAlchemy và JWTManager
 db = SQLAlchemy()
 jwt = JWTManager()
