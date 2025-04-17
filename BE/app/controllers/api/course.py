@@ -62,7 +62,6 @@ def delete_course(id):
     return jsonify({'message': 'Course deleted'})
 
 
-### ------------------------- COURSE CLASS -------------------------
 
 @course_bp.route('/classes', methods=['POST'])
 @role_required(['admin'])
@@ -120,7 +119,7 @@ def delete_course_class(id):
     return jsonify({'message': 'Course class deleted'})
 
 
-### ------------------------- COURSE SCHEDULE -------------------------
+
 
 @course_bp.route('/schedules', methods=['POST'])
 @role_required(['admin'])

@@ -348,7 +348,7 @@ def role_required(allowed_roles):
 @admin_bp.route('/users', methods=['GET'])
 @role_required(['Admin'])  # Chỉ admin được phép truy cập
 def get_users():
-    role_filter = request.args.get('role')  # ?role=student / instructor / ...
+    role_filter = request.args.get('role')
 
     users = Users.query.all()
     user_list = []
@@ -667,8 +667,6 @@ def change_password_first_time():
     db.session.commit()
 
     return jsonify({'message': 'Đổi mật khẩu thành công'})
-
-
 
 reset_codes = {}
 # gửi gmail
