@@ -1,14 +1,16 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import get_jwt_identity
 from app import db
-from models.course_models import Course, CourseClass, CourseSchedule
-from models import Instructor, Student  # nếu cần
+from app.models.course_models import Course, CourseClass, CourseSchedule,Enrollment
+from app.models.user import Instructor, Student
 from sqlalchemy.exc import IntegrityError
-from admin import role_required
+from app.controllers.api.admin import role_required
+from app.utils.course_helper import is_duplicate_course, is_duplicate_class_code, is_conflicting_schedule
 
-course_bp = Blueprint('course', __name__)
-@course_bp.route('/', methods=['GET'])
-@role_required(['admin'])
+course_bp = Blueprint('course_bp', __name__)
+# đã check
+@course_bp.route('/', methods=['GET'])    
+@role_required(['Admin'])
 def get_all_courses():
     courses = Course.query.all()
     data = [{
@@ -20,11 +22,15 @@ def get_all_courses():
     } for c in courses]
     return jsonify(data)
 
-
+# đã check
 @course_bp.route('/', methods=['POST'])
-@role_required(['admin'])
+@role_required(['Admin'])
 def create_course():
     data = request.get_json()
+
+    if is_duplicate_course(data['code']):
+        return jsonify({'error': 'Course code already exists'}), 400
+
     try:
         course = Course(
             code=data['code'],
@@ -40,8 +46,9 @@ def create_course():
         return jsonify({'error': 'Course code must be unique'}), 400
 
 
+
 @course_bp.route('/<int:id>', methods=['PUT'])
-@role_required(['admin'])
+@role_required(['Admin'])
 def update_course(id):
     course = Course.query.get_or_404(id)
     data = request.get_json()
@@ -54,7 +61,7 @@ def update_course(id):
 
 
 @course_bp.route('/<int:id>', methods=['DELETE'])
-@role_required(['admin'])
+@role_required(['Admin'])
 def delete_course(id):
     course = Course.query.get_or_404(id)
     db.session.delete(course)
@@ -64,9 +71,13 @@ def delete_course(id):
 
 
 @course_bp.route('/classes', methods=['POST'])
-@role_required(['admin'])
+@role_required(['Admin'])
 def create_course_class():
     data = request.get_json()
+
+    if is_duplicate_class_code(data['class_code']):
+        return jsonify({'error': 'Class code already exists'}), 400
+
     course_class = CourseClass(
         course_id=data['course_id'],
         instructor_id=data['instructor_id'],
@@ -79,8 +90,9 @@ def create_course_class():
     db.session.commit()
     return jsonify({'message': 'Course class created', 'id': course_class.id})
 
+
 @course_bp.route('/classes/<int:id>', methods=['PUT'])
-@role_required(['admin'])
+@role_required(['Admin'])
 def update_course_class(id):
     data = request.get_json()
     course_class = CourseClass.query.get_or_404(id)
@@ -97,7 +109,7 @@ def update_course_class(id):
 
 
 @course_bp.route('/classes/<int:instructor_id>', methods=['GET'])
-@role_required(['admin'])
+@role_required(['Admin'])
 def get_classes_by_instructor(instructor_id):
     classes = CourseClass.query.filter_by(instructor_id=instructor_id).all()
     result = [{
@@ -111,7 +123,7 @@ def get_classes_by_instructor(instructor_id):
 
 
 @course_bp.route('/classes/<int:id>', methods=['DELETE'])
-@role_required(['admin'])
+@role_required(['Admin'])
 def delete_course_class(id):
     course_class = CourseClass.query.get_or_404(id)
     db.session.delete(course_class)
@@ -122,9 +134,13 @@ def delete_course_class(id):
 
 
 @course_bp.route('/schedules', methods=['POST'])
-@role_required(['admin'])
+@role_required(['Admin'])
 def create_schedule():
     data = request.get_json()
+
+    if is_conflicting_schedule(data['course_class_id'], data['day_of_week'], data['start_time'], data['end_time']):
+        return jsonify({'error': 'Schedule already exists for this class at the same time'}), 400
+
     schedule = CourseSchedule(
         course_class_id=data['course_class_id'],
         day_of_week=data['day_of_week'],
@@ -138,8 +154,9 @@ def create_schedule():
     db.session.commit()
     return jsonify({'message': 'Schedule created', 'id': schedule.id})
 
+
 @course_bp.route('/schedules/<int:id>', methods=['PUT'])
-@role_required(['admin'])
+@role_required(['Admin'])
 def update_schedule(id):
     data = request.get_json()
     schedule = CourseSchedule.query.get_or_404(id)
@@ -156,7 +173,7 @@ def update_schedule(id):
     return jsonify({'message': 'Schedule updated'})
 
 @course_bp.route('/schedules/<int:class_id>', methods=['GET'])
-@role_required(['admin'])
+@role_required(['Admin'])
 def get_schedules_by_class(class_id):
     schedules = CourseSchedule.query.filter_by(course_class_id=class_id).all()
     result = [{
@@ -171,7 +188,7 @@ def get_schedules_by_class(class_id):
 
 
 @course_bp.route('/schedules/<int:id>', methods=['DELETE'])
-@role_required(['admin'])
+@role_required(['Admin'])
 def delete_schedule(id):
     schedule = CourseSchedule.query.get_or_404(id)
     db.session.delete(schedule)

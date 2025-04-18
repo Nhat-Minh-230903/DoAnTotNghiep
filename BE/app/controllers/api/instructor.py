@@ -1,8 +1,8 @@
 from flask_jwt_extended import get_jwt_identity
-from admin import role_required
+from app.controllers.api.admin import role_required
 from flask import Blueprint, request, jsonify
-from models.course_models import Course, CourseClass, CourseSchedule
-from models import Instructor
+from app.models.course_models import Course, CourseClass, CourseSchedule
+from app.models.user import Instructor
 
 instructor_bq = Blueprint('instructor', __name__)
 

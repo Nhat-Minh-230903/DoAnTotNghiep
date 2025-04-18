@@ -41,3 +41,18 @@ class CourseSchedule(db.Model):
     building = db.Column(db.String(50))
     floor = db.Column(db.String(10))
     room = db.Column(db.String(20))
+
+class Enrollment(db.Model):
+    __tablename__ = 'enrollments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    course_class_id = db.Column(db.Integer, db.ForeignKey('course_classes.id'), nullable=False)
+    enrolled_at = db.Column(db.DateTime, default=db.func.now())
+
+    student = db.relationship('Student', backref='enrollments')
+    course_class = db.relationship('CourseClass', backref='enrollments')
+
+    __table_args__ = (
+        db.UniqueConstraint('student_id', 'course_class_id', name='unique_enrollment'),
+    )

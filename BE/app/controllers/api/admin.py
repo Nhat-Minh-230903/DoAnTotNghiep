@@ -12,6 +12,7 @@ from werkzeug.security import check_password_hash
 import random
 from flask_mail import Message
 from app.extensions import mail, db
+
 admin_bp = Blueprint('admin_bp', __name__)
 
 # Hàm tạo student_id từ năm nhập học, ngành, khoa và STT
