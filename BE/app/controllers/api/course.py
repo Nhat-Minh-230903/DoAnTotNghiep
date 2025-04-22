@@ -5,7 +5,7 @@ from app.models.course_models import Course, CourseClass, CourseSchedule,Enrollm
 from app.models.user import Instructor, Student
 from sqlalchemy.exc import IntegrityError
 from app.controllers.api.admin import role_required
-from app.utils.course_helper import is_duplicate_course, is_duplicate_class_code, is_conflicting_schedule
+from app.utils.course_helper import is_duplicate_course, is_duplicate_class_code, is_conflicting_schedule,generate_course_code
 
 course_bp = Blueprint('course_bp', __name__)
 # đã check
@@ -28,23 +28,25 @@ def get_all_courses():
 def create_course():
     data = request.get_json()
 
-    if is_duplicate_course(data['code']):
-        return jsonify({'error': 'Course code already exists'}), 400
+    # Generate code từ major
+    generated_code = generate_course_code(data['major_id'])
+    if not generated_code:
+        return jsonify({'error': 'Không thể sinh mã môn học vì thiếu prefix chuyên ngành'}), 400
 
-    try:
-        course = Course(
-            code=data['code'],
-            name=data['name'],
-            credit=data.get('credit', 0),
-            faculty_id=data.get('faculty_id')
-        )
-        db.session.add(course)
-        db.session.commit()
-        return jsonify({'message': 'Course created', 'id': course.id}), 201
-    except IntegrityError:
-        db.session.rollback()
-        return jsonify({'error': 'Course code must be unique'}), 400
+    # Check mã đã tồn tại chưa
+    if is_duplicate_course(generated_code):
+        return jsonify({'error': 'Mã môn học đã tồn tại'}), 400
 
+    course = Course(
+        code=generated_code,
+        name=data['name'],
+        credit=data.get('credit', 0),
+        faculty_id=data.get('faculty_id'),
+        major_id=data['major_id']
+    )
+    db.session.add(course)
+    db.session.commit()
+    return jsonify({'message': 'Course created', 'code': generated_code, 'id': course.id}), 201
 
 
 @course_bp.route('/<int:id>', methods=['PUT'])
