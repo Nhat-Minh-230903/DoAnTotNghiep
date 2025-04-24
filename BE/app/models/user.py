@@ -27,19 +27,14 @@ class Faculty(db.Model):
     __tablename__ = 'faculties'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
-
+    prefix=db.Column(db.String(10))
 class Major(db.Model):
     __tablename__ = 'majors'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     faculty_id = db.Column(db.Integer, db.ForeignKey('faculties.id'), nullable=False)
+    prefix=db.Column(db.String(10))
 
-# class Department(db.Model):
-#     __tablename__ = 'departments'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(100), unique=True, nullable=False)
-
-# 👉 Student Model mới
 class Student(db.Model):
     __tablename__ = 'students'
 

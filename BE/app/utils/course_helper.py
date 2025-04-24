@@ -40,8 +40,6 @@ def generate_course_code(major_id):
     return code
 
 
-
-
 def generate_prefix_from_name(name):
 
     if not name:

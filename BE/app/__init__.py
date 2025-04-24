@@ -9,6 +9,8 @@ from app.controllers.api.course import course_bp
 from app.controllers.api.instructor import instructor_bq
 from app.controllers.api.student import student_bq
 from app.extensions import mail
+from app.controllers.api.faculty import faculty_bp
+from app.controllers.api.major import major_bp
 
 def create_app():
     app = Flask(__name__)
@@ -25,7 +27,8 @@ def create_app():
     app.register_blueprint(course_bp, url_prefix="/api/course")
     app.register_blueprint(student_bq, url_prefix="/api/student")
     app.register_blueprint(instructor_bq, url_prefix="/api/instructor")
-
+    app.register_blueprint(faculty_bp, url_prefix="/api/faculty")
+    app.register_blueprint(major_bp, url_prefix="/api/major")
 
     mail.init_app(app)
     return app
