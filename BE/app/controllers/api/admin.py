@@ -12,6 +12,9 @@ from werkzeug.security import check_password_hash
 import random
 from flask_mail import Message
 from app.extensions import mail, db
+from werkzeug.utils import secure_filename
+import os
+from app.utils.course_helper import generate_prefix_from_name
 
 admin_bp = Blueprint('admin_bp', __name__)
 
@@ -716,6 +719,7 @@ def reset_password():
 @admin_bp.route('/change-password', methods=['POST'])
 @jwt_required()
 def change_password():
+
     user_id = get_jwt_identity()
     user = Users.query.get(user_id)
 
@@ -730,3 +734,64 @@ def change_password():
     db.session.commit()
 
     return jsonify({"message": "Đổi mật khẩu thành công"}), 200
+
+
+
+
+@admin_bp.route('/import/faculty-majors', methods=['POST'])
+@role_required(['Admin'])
+def import_faculty_and_majors():
+    if 'file' not in request.files:
+        return jsonify({'message': 'Không tìm thấy file'}), 400
+
+    file = request.files['file']
+    if file.filename == '' or not file.filename.endswith('.xlsx'):
+        return jsonify({'message': 'Tên file không hợp lệ hoặc không phải định dạng .xlsx'}), 400
+
+    filename = secure_filename(file.filename)
+    filepath = os.path.join('tmp', filename)
+    os.makedirs('tmp', exist_ok=True)
+    file.save(filepath)
+
+    try:
+        df = pd.read_excel(filepath)
+        added_faculty, added_major, skipped_major = 0, 0, 0
+
+        for _, row in df.iterrows():
+            faculty_name = row.get('Faculty Name')
+            major_name = row.get('Major Name')
+            if not faculty_name or not major_name:
+                continue
+
+            # Thêm hoặc tìm faculty
+            faculty = Faculty.query.filter_by(name=faculty_name).first()
+            if not faculty:
+                faculty = Faculty(name=faculty_name, prefix=generate_prefix_from_name(faculty_name))
+                db.session.add(faculty)
+                db.session.flush()  # để lấy faculty.id ngay lập tức
+                added_faculty += 1
+
+            # Thêm major nếu chưa có
+            existing_major = Major.query.filter_by(name=major_name, faculty_id=faculty.id).first()
+            if existing_major:
+                skipped_major += 1
+                continue
+
+            prefix = generate_prefix_from_name(major_name)
+            major = Major(name=major_name, prefix=prefix, faculty_id=faculty.id)
+            db.session.add(major)
+            added_major += 1
+
+        db.session.commit()
+        os.remove(filepath)
+
+        return jsonify({
+            'message': 'Import ngành và chuyên ngành hoàn tất',
+            'added_faculty': added_faculty,
+            'added_major': added_major,
+            'skipped_major (tồn tại)': skipped_major
+        }), 200
+
+    except Exception as e:
+        os.remove(filepath)
+        return jsonify({'message': f'Lỗi xử lý file: {str(e)}'}), 500
