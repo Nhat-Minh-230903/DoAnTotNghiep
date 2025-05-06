@@ -4,7 +4,7 @@ from app import db
 from app.models.course_models import Course, CourseClass, CourseSchedule,Enrollment
 from app.models.user import Instructor, Student
 from sqlalchemy.exc import IntegrityError
-from app.controllers.api.admin import role_required
+from app.controllers.api.admin.admin import role_required
 from app.utils.course_helper import is_duplicate_course, is_duplicate_class_code, is_conflicting_schedule,generate_course_code
 
 course_bp = Blueprint('course_bp', __name__)

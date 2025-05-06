@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from app.models.user import Major, Faculty
 from app.utils.course_helper import generate_prefix_from_name
-from app.controllers.api.admin import role_required
+from BE.app.controllers.api.admin.admin import role_required
 import os
 from werkzeug.utils import secure_filename
 import pandas as pd

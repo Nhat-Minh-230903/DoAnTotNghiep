@@ -80,7 +80,7 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
-    return jsonify({'message': 'Tạo tài khoản thành công'}), 
+    return jsonify({'message': 'Tạo tài khoản thành công'}), 201
 
 
 @auth_bp.route('/logout', methods=['POST'])

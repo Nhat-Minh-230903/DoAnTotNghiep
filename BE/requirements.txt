@@ -1,7 +1,8 @@
-flask==2.0.1
-flask-jwt-extended==4.3.1
-marshmallow==3.13.0
-PyMySQL==1.0.2
-Flask-SQLAlchemy==2.5.1
-bcrypt==3.2.0
-python-dotenv==0.19.1
+Flask==2.2.5
+Flask_JWT_Extended==4.4.4
+flask_mail==0.9.1
+Flask_SQLAlchemy==2.5.1
+pandas==2.2.3
+bcrypt==4.0.1  # thay python_bcrypt bằng bcrypt
+SQLAlchemy==2.0.40
+Werkzeug==3.1.3

@@ -735,9 +735,6 @@ def change_password():
 
     return jsonify({"message": "Đổi mật khẩu thành công"}), 200
 
-
-
-
 @admin_bp.route('/import/faculty-majors', methods=['POST'])
 @role_required(['Admin'])
 def import_faculty_and_majors():
